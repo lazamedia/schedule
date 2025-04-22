@@ -5,6 +5,7 @@ let selectedMode = localStorage.getItem('selectedMode') || '';
 let activeDay = '';
 let activeTab = 'schedule';
 let activeScheduleId = null;
+let primaryColor = localStorage.getItem('primaryColor') || '#6D67E4'; // Default primary color
 
 // Element references
 const modeSelection = document.getElementById('modeSelection');
@@ -34,6 +35,7 @@ const settingsModal = document.getElementById('settingsModal');
 const closeSettingsModal = document.getElementById('closeSettingsModal');
 const changeToRegular = document.getElementById('changeToRegular');
 const changeToWeekend = document.getElementById('changeToWeekend');
+const colorPicker = document.getElementById('colorPicker');
 
 // Detail modal
 const detailModal = document.getElementById('detailModal');
@@ -99,10 +101,23 @@ const days = {
     '7': 'Minggu'
 };
 
+// Color themes
+const colorThemes = [
+    { name: 'Purple', value: '#6D67E4' },
+    { name: 'Blue', value: '#3498db' },
+    { name: 'Green', value: '#2ecc71' },
+    { name: 'Red', value: '#e74c3c' },
+    { name: 'Orange', value: '#e67e22' },
+    { name: 'Teal', value: '#1abc9c' }
+];
+
 // Inisialisasi aplikasi
 function initApp() {
     // Load data dari localStorage
     loadData();
+    
+    // Apply theme
+    applyThemeColor();
     
     // Cek apakah mode sudah dipilih sebelumnya
     if (selectedMode) {
@@ -131,6 +146,9 @@ function initApp() {
             setupNavigations();
         });
     }
+    
+    // Setup color theme selector
+    setupColorThemeSelector();
     
     // Tab navigation
     scheduleTab.addEventListener('click', () => {
@@ -279,6 +297,57 @@ function loadData() {
     if (schedules.length === 0) {
         addSampleSchedules();
     }
+}
+
+// Setup color theme selector
+function setupColorThemeSelector() {
+    // Create color options
+    const colorThemeContainer = document.getElementById('colorThemeContainer');
+    colorThemeContainer.innerHTML = '';
+    
+    colorThemes.forEach(theme => {
+        const colorOption = document.createElement('div');
+        colorOption.className = 'color-option';
+        colorOption.style.backgroundColor = theme.value;
+        colorOption.setAttribute('data-color', theme.value);
+        
+        if (theme.value === primaryColor) {
+            colorOption.classList.add('active');
+        }
+        
+        colorOption.addEventListener('click', () => {
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            colorOption.classList.add('active');
+            primaryColor = theme.value;
+            localStorage.setItem('primaryColor', primaryColor);
+            applyThemeColor();
+            showToast('Tema warna berhasil diubah');
+        });
+        
+        colorThemeContainer.appendChild(colorOption);
+    });
+}
+
+// Apply theme color
+function applyThemeColor() {
+    document.documentElement.style.setProperty('--primary', primaryColor);
+    
+    // Derive other colors from primary
+    const lightenedColor = adjustColor(primaryColor, 20);
+    const darkenedColor = adjustColor(primaryColor, -20);
+    
+    document.documentElement.style.setProperty('--primary-light', lightenedColor);
+    document.documentElement.style.setProperty('--primary-dark', darkenedColor);
+}
+
+// Helper function to lighten or darken a hex color
+function adjustColor(color, amount) {
+    return '#' + color.replace(/^#/, '').replace(/../g, color => {
+        const value = Math.min(255, Math.max(0, parseInt(color, 16) + amount));
+        return value.toString(16).padStart(2, '0');
+    });
 }
 
 // Setup UI berdasarkan mode
@@ -459,6 +528,9 @@ function renderTasks() {
                     <div class="task-due"><i class="far fa-calendar-alt"></i> ${formattedDate}</div>
                 </div>
                 <div class="task-actions">
+                    <button class="btn-icon btn-outline view-task-btn" data-id="${task.id}">
+                        <i class="fas fa-eye"></i>
+                    </button>
                     <button class="btn-icon btn-danger delete-task-btn" data-id="${task.id}">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -483,6 +555,14 @@ function renderTasks() {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id');
                 deleteTask(id);
+            });
+        });
+        
+        // Tambahkan event listener untuk tombol view
+        document.querySelectorAll('.view-task-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                showTaskDetail(id);
             });
         });
     }
@@ -576,6 +656,114 @@ function showScheduleDetail(id) {
             </div>
         `;
         
+        // Reset buttons to default schedule mode
+        deleteScheduleBtn.style.display = 'block';
+        deleteScheduleBtn.textContent = 'Hapus';
+        editScheduleBtn.textContent = 'Edit';
+        addTaskForScheduleBtn.style.display = 'block';
+        
+        detailModal.classList.add('show');
+    }
+}
+
+// Tampilkan detail tugas
+function showTaskDetail(id) {
+    const task = tasks.find(t => t.id === id);
+    
+    if (task) {
+        activeScheduleId = task.id; // Store task ID for potential deletion
+        
+        // Find related schedule
+        const relatedSchedule = schedules.find(s => s.id === task.courseId);
+        const courseName = relatedSchedule ? relatedSchedule.courseName : 'Tidak ada mata kuliah';
+        
+        // Format due date
+        const dueDate = new Date(task.dueDate);
+        const formattedDate = dueDate.toLocaleDateString('id-ID', { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+        });
+        
+        detailTitle.textContent = task.title;
+        
+        detailBody.innerHTML = `
+            <div class="detail-section">
+                <div class="detail-info">
+                    <div class="detail-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div>
+                        <div class="detail-label">Mata Kuliah</div>
+                        <div class="detail-text">${courseName}</div>
+                    </div>
+                </div>
+                
+                <div class="detail-info">
+                    <div class="detail-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <div class="detail-label">Deadline</div>
+                        <div class="detail-text">${formattedDate}</div>
+                    </div>
+                </div>
+                
+                ${task.description ? `
+                <div class="detail-info">
+                    <div class="detail-icon">
+                        <i class="fas fa-align-left"></i>
+                    </div>
+                    <div>
+                        <div class="detail-label">Deskripsi</div>
+                        <div class="detail-text">${task.description}</div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="detail-info">
+                    <div class="detail-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <div class="detail-label">Status</div>
+                        <div class="detail-text">${task.completed ? 'Selesai' : 'Belum Selesai'}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn ${task.completed ? 'btn-outline' : 'btn-primary'}" id="toggleTaskBtn" data-id="${task.id}" data-completed="${task.completed}">
+                    ${task.completed ? '<i class="fas fa-times"></i> Tandai Belum Selesai' : '<i class="fas fa-check"></i> Tandai Selesai'}
+                </button>
+            </div>
+        `;
+        
+        // Change footer buttons for tasks
+        deleteScheduleBtn.style.display = 'block';
+        deleteScheduleBtn.textContent = 'Hapus Tugas';
+        deleteScheduleBtn.onclick = function() {
+            detailModal.classList.remove('show');
+            deleteTask(task.id);
+        };
+        
+        editScheduleBtn.textContent = 'Edit Tugas';
+        editScheduleBtn.onclick = function() {
+            detailModal.classList.remove('show');
+            editTask(task.id);
+        };
+        
+        addTaskForScheduleBtn.style.display = 'none';
+        
+        // Add event listener for toggle button
+        document.getElementById('toggleTaskBtn').addEventListener('click', function() {
+            const taskId = this.getAttribute('data-id');
+            const currentStatus = this.getAttribute('data-completed') === 'true';
+            toggleTaskStatus(taskId, !currentStatus);
+            detailModal.classList.remove('show');
+        });
+        
         detailModal.classList.add('show');
     }
 }
@@ -607,7 +795,7 @@ function populateDayOptions() {
     dayInput.innerHTML = '';
     
     if (selectedMode === 'weekday') {
-        // Opsi hari untuk weekday
+        // Opsi hari untuk weekday (Monday-Friday)
         dayInput.innerHTML = `
             <option value="">Pilih Hari</option>
             <option value="1" ${activeDay === '1' ? 'selected' : ''}>Senin</option>
@@ -617,7 +805,7 @@ function populateDayOptions() {
             <option value="5" ${activeDay === '5' ? 'selected' : ''}>Jumat</option>
         `;
     } else {
-        // Opsi hari untuk weekend
+        // Opsi hari untuk weekend (Saturday-Sunday)
         dayInput.innerHTML = `
             <option value="">Pilih Hari</option>
             <option value="6" ${activeDay === '6' ? 'selected' : ''}>Sabtu</option>
@@ -646,6 +834,25 @@ function editSchedule(id) {
         
         modalTitle.textContent = 'Edit Jadwal Kuliah';
         scheduleModal.classList.add('show');
+    }
+}
+
+// Edit tugas
+function editTask(id) {
+    const task = tasks.find(t => t.id === id);
+    
+    if (task) {
+        taskIdInput.value = task.id;
+        taskTitleInput.value = task.title;
+        taskCourseInput.value = task.courseId;
+        taskDueDateInput.value = task.dueDate;
+        taskDescriptionInput.value = task.description || '';
+        
+        // Populate course options
+        populateCourseOptions(task.courseId);
+        
+        taskModalTitle.textContent = 'Edit Tugas';
+        taskModal.classList.add('show');
     }
 }
 

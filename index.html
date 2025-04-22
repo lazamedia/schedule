@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Kuliahku</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" style="border-radius: 100%;">
+    <title>JadwalKu</title>
     <style>
         :root {
             --primary: #6D67E4;
@@ -204,10 +205,16 @@
         /* Cards & Content */
         .card {
             background-color: var(--white);
-            border-radius: 16px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
             margin-bottom: 16px;
             overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
         }
         
         .card-header {
@@ -255,14 +262,14 @@
         .day-nav-item {
             flex: 1;
             min-width: 60px;
-            padding: 12px 8px;
+            padding: 16px 10px;
             text-align: center;
             background-color: var(--gray-light);
-            border-radius: 12px;
-            font-weight: 500;
-            font-size: 14px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 15px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -278,7 +285,8 @@
         .day-nav-item.active {
             background-color: var(--primary);
             color: var(--white);
-            box-shadow: 0 4px 6px rgba(109, 103, 228, 0.2);
+            box-shadow: 0 8px 15px rgba(109, 103, 228, 0.3);
+            transform: translateY(-3px);
         }
         
         /* Buttons */
@@ -286,9 +294,9 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 16px;
+            padding: 14px 18px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             text-align: center;
             text-decoration: none;
             color: var(--white);
@@ -296,9 +304,10 @@
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             outline: none;
             width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         
         .btn i {
@@ -311,7 +320,8 @@
         
         .btn:hover {
             background-color: var(--primary-dark);
-            box-shadow: 0 4px 8px rgba(109, 103, 228, 0.2);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
         }
         
         .btn-sm {
@@ -321,13 +331,18 @@
         }
         
         .btn-icon {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             padding: 0;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-icon:hover {
+            transform: scale(1.1);
         }
         
         .btn-icon i {
@@ -385,10 +400,10 @@
         
         .form-control {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 18px;
             font-size: 16px;
             border: 1px solid var(--gray-dark);
-            border-radius: 12px;
+            border-radius: 15px;
             outline: none;
             transition: all 0.2s;
             background-color: var(--white);
@@ -396,7 +411,8 @@
         
         .form-control:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(109, 103, 228, 0.25);
+            box-shadow: 0 5px 15px rgba(109, 103, 228, 0.2);
+            transform: translateY(-2px);
         }
         
         .form-row {
@@ -450,11 +466,14 @@
         
         .schedule-item {
             position: relative;
-            padding: 16px;
+            padding: 18px 16px;
             border-bottom: 1px solid var(--gray);
             display: flex;
             align-items: center;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
         }
         
         .schedule-item:last-child {
@@ -462,21 +481,24 @@
         }
         
         .schedule-item:hover {
-            background-color: var(--gray-light);
+            background-color: rgba(109, 103, 228, 0.05);
+            border-color: var(--gray);
+            transform: translateX(3px);
         }
         
         .schedule-time {
             flex-shrink: 0;
-            width: 75px;
+            width: 80px;
             margin-right: 12px;
             text-align: center;
             color: var(--primary);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.2;
             background-color: rgba(109, 103, 228, 0.08);
-            padding: 8px 0;
-            border-radius: 8px;
+            padding: 10px 0;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(109, 103, 228, 0.15);
         }
         
         .schedule-content {
@@ -521,11 +543,14 @@
         
         .task-item {
             position: relative;
-            padding: 12px 16px;
+            padding: 18px 16px;
             border-bottom: 1px solid var(--gray);
             display: flex;
             align-items: center;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
         }
         
         .task-item:last-child {
@@ -533,7 +558,9 @@
         }
         
         .task-item:hover {
-            background-color: var(--gray-light);
+            background-color: rgba(109, 103, 228, 0.05);
+            border-color: var(--gray);
+            transform: translateX(3px);
         }
         
         .task-checkbox {
@@ -623,6 +650,8 @@
         
         .task-actions {
             margin-left: 8px;
+            display: flex;
+            gap: 8px;
         }
         
         /* Badge */
@@ -676,32 +705,34 @@
         }
         
         /* FAB */
-        .fab {
+        .fabs {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            width: 60px;
-            height: 60px;
-            border-radius: 30px;
+            width: 65px;
+            height: 65px;
+            border-radius: 35px;
             background-color: var(--primary);
             color: var(--white);
             display: flex;
             align-items: center;
+            align-content: center;
             justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            font-size: 26px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
             z-index: 100;
             cursor: pointer;
             transition: all 0.2s;
+            box-sizing: border-box;
         }
         
-        .fab:hover {
+        .fabs:hover {
             background-color: var(--primary-dark);
             transform: translateY(-4px);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
         }
         
-        .fab:active {
+        .fabs:active {
             transform: scale(0.95);
         }
         
@@ -730,12 +761,12 @@
         
         .modal {
             background-color: var(--white);
-            border-radius: 16px;
+            border-radius: 20px;
             width: 90%;
             max-width: 400px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
             transform: translateY(20px) scale(0.95);
             transition: all 0.3s;
         }
@@ -745,7 +776,7 @@
         }
         
         .modal-header {
-            padding: 20px;
+            padding: 22px 24px;
             border-bottom: 1px solid var(--gray);
             display: flex;
             justify-content: space-between;
@@ -785,7 +816,7 @@
         }
         
         .modal-body {
-            padding: 20px;
+            padding: 24px;
         }
         
         .modal-footer {
@@ -822,8 +853,8 @@
         }
         
         .detail-icon {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background-color: rgba(109, 103, 228, 0.1);
             color: var(--primary);
@@ -832,11 +863,14 @@
             justify-content: center;
             margin-right: 12px;
             flex-shrink: 0;
+            font-size: 18px;
+            box-shadow: 0 3px 8px rgba(109, 103, 228, 0.15);
         }
         
         .detail-text {
-            font-size: 15px;
+            font-size: 16px;
             color: var(--text-dark);
+            font-weight: 500;
         }
         
         .detail-label {
@@ -859,14 +893,14 @@
             transform: translateX(-50%) translateY(100px);
             background-color: var(--text-dark);
             color: var(--white);
-            padding: 12px 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 14px 28px;
+            border-radius: 50px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             z-index: 1100;
             opacity: 0;
             transition: transform 0.3s, opacity 0.3s;
             text-align: center;
-            font-weight: 500;
+            font-weight: 600;
             max-width: 90%;
         }
         
@@ -903,6 +937,40 @@
                 transform: rotate(360deg);
             }
         }
+        /* Add this to your CSS */
+.color-theme-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.color-option {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.color-option.active::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -918,7 +986,7 @@
                     <i class="fas fa-calendar-week"></i>
                 </div>
                 <div class="mode-title">Kuliah Reguler</div>
-                <div class="mode-description">Senin - Jumat</div>
+                <div class="mode-description">Senin - Sabtu</div>
             </div>
             
             <div class="mode-card" id="selectWeekend">
@@ -926,7 +994,7 @@
                     <i class="fas fa-calendar-day"></i>
                 </div>
                 <div class="mode-title">Kuliah Weekend</div>
-                <div class="mode-description">Sabtu - Minggu</div>
+                <div class="mode-description">Minggu</div>
             </div>
         </div>
     </div>
@@ -965,35 +1033,29 @@
                         <!-- Day navigation for regular mode -->
                         <div class="day-nav" id="regularDayNav" style="display: none;">
                             <div class="day-nav-item active" data-day="1">
-                                <i class="fas fa-calendar-day"></i>
                                 <span>Senin</span>
                             </div>
                             <div class="day-nav-item" data-day="2">
-                                <i class="fas fa-calendar-day"></i>
                                 <span>Selasa</span>
                             </div>
                             <div class="day-nav-item" data-day="3">
-                                <i class="fas fa-calendar-day"></i>
                                 <span>Rabu</span>
                             </div>
                             <div class="day-nav-item" data-day="4">
-                                <i class="fas fa-calendar-day"></i>
                                 <span>Kamis</span>
                             </div>
                             <div class="day-nav-item" data-day="5">
-                                <i class="fas fa-calendar-day"></i>
                                 <span>Jumat</span>
                             </div>
+                            
                         </div>
                         
                         <!-- Day navigation for weekend mode -->
                         <div class="day-nav" id="weekendDayNav" style="display: none;">
-                            <div class="day-nav-item active" data-day="6">
-                                <i class="fas fa-calendar-day"></i>
+                            <div class="day-nav-item" data-day="6">
                                 <span>Sabtu</span>
                             </div>
-                            <div class="day-nav-item" data-day="7">
-                                <i class="fas fa-calendar-day"></i>
+                            <div class="day-nav-item active" data-day="7">
                                 <span>Minggu</span>
                             </div>
                         </div>
@@ -1006,7 +1068,7 @@
                             <i class="fas fa-calendar-times"></i>
                             <p>Belum ada jadwal untuk hari ini</p>
                             <button class="btn" id="addScheduleEmptyBtn">
-                                <i class="fas fa-plus"></i> Tambah Jadwal Sekarang
+                                 Tambah Jadwal Sekarang
                             </button>
                         </div>
                     </div>
@@ -1033,7 +1095,7 @@
                             <i class="fas fa-clipboard-check"></i>
                             <p>Belum ada tugas yang ditambahkan</p>
                             <button class="btn btn-secondary" id="addTaskEmptyBtn">
-                                <i class="fas fa-plus"></i> Tambah Tugas Sekarang
+                                 Tambah Tugas Sekarang
                             </button>
                         </div>
                     </div>
@@ -1042,8 +1104,8 @@
         </div>
     </main>
     
-    <div class="fab" id="addBtn">
-        <i class="fas fa-plus"></i>
+    <div class="fabs" id="addBtn">
+        <i class="fas fa-plus"></i> 
     </div>
     
     <!-- Modal pengaturan -->
@@ -1055,8 +1117,9 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+            <!-- Add this to the settings modal body -->
             <div class="modal-body">
-                <p style="margin-bottom: 16px;">Ubah jenis kuliah yang ingin diatur jadwalnya:</p>
+                <p style="margin-bottom: 16px;">Ubah jenis kuliah : </p>
                 
                 <div class="form-group">
                     <button class="btn" id="changeToRegular">
@@ -1068,6 +1131,14 @@
                     <button class="btn btn-secondary" id="changeToWeekend">
                         <i class="fas fa-calendar-day"></i> Kuliah Weekend (Sabtu-Minggu)
                     </button>
+                </div>
+                
+                <hr style="margin: 20px 0; border-top: 1px solid var(--gray);">
+                
+                <p style="margin-bottom: 16px;">Ubah Warna Tema : </p>
+                
+                <div class="color-theme-container" id="colorThemeContainer">
+                    <!-- Color options will be added here by JavaScript -->
                 </div>
             </div>
         </div>
@@ -1219,3 +1290,4 @@
     
     <script src="script.js"></script>
 </body>
+</html>
