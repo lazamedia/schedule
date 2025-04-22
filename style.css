@@ -246,6 +246,7 @@ main {
     margin-bottom: 16px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
+    padding-top: 10px;
 }
 
 .day-nav::-webkit-scrollbar {
