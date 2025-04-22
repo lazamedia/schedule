@@ -548,13 +548,7 @@ function renderTasks() {
             });
         });
         
-        // // Tambahkan event listener untuk tombol delete
-        // document.querySelectorAll('.delete-task-btn').forEach(btn => {
-        //     btn.addEventListener('click', () => {
-        //         const id = btn.getAttribute('data-id');
-        //         deleteTask(id);
-        //     });
-        // });
+
         
         // Tambahkan event listener untuk tombol view
         document.querySelectorAll('.view-task-btn').forEach(btn => {
