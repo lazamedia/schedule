@@ -531,9 +531,7 @@ function renderTasks() {
                     <button class="btn-icon btn-outline view-task-btn" data-id="${task.id}">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-icon btn-danger delete-task-btn" data-id="${task.id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    
                 </div>
             `;
             
@@ -550,13 +548,13 @@ function renderTasks() {
             });
         });
         
-        // Tambahkan event listener untuk tombol delete
-        document.querySelectorAll('.delete-task-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                deleteTask(id);
-            });
-        });
+        // // Tambahkan event listener untuk tombol delete
+        // document.querySelectorAll('.delete-task-btn').forEach(btn => {
+        //     btn.addEventListener('click', () => {
+        //         const id = btn.getAttribute('data-id');
+        //         deleteTask(id);
+        //     });
+        // });
         
         // Tambahkan event listener untuk tombol view
         document.querySelectorAll('.view-task-btn').forEach(btn => {
