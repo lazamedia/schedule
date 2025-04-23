@@ -430,8 +430,20 @@ function renderSchedules() {
             const formattedStartTime = formatTime(schedule.timeStart);
             const formattedEndTime = formatTime(schedule.timeEnd);
             
-            // Hitung jumlah tugas untuk jadwal ini
-            const scheduleTasks = tasks.filter(task => task.courseId === schedule.id && !task.completed);
+            // Hitung jumlah tugas untuk jadwal ini dan jadwal lain dengan nama yang sama
+            let scheduleTasks = [];
+            
+            // Cari semua jadwal dengan nama mata kuliah yang sama
+            const sameNameSchedules = schedules.filter(s => s.courseName === schedule.courseName);
+            
+            // Kumpulkan semua ID jadwal dengan nama yang sama
+            const scheduleIds = sameNameSchedules.map(s => s.id);
+            
+            // Cari tugas yang terkait dengan jadwal-jadwal ini
+            scheduleTasks = tasks.filter(task => 
+                scheduleIds.includes(task.courseId) && !task.completed
+            );
+            
             const taskBadge = scheduleTasks.length > 0 ? 
                 `<span class="badge badge-primary"><i class="fas fa-tasks"></i> ${scheduleTasks.length} tugas</span>` : '';
             
@@ -574,8 +586,18 @@ function showScheduleDetail(id) {
         const formattedStartTime = formatTime(schedule.timeStart);
         const formattedEndTime = formatTime(schedule.timeEnd);
         
-        // Hitung jumlah tugas untuk jadwal ini
-        const scheduleTasks = tasks.filter(task => task.courseId === schedule.id);
+        // Hitung jumlah tugas untuk jadwal ini dan jadwal lain dengan nama yang sama
+        let scheduleTasks = [];
+        
+        // Cari semua jadwal dengan nama mata kuliah yang sama
+        const sameNameSchedules = schedules.filter(s => s.courseName === schedule.courseName);
+        
+        // Kumpulkan semua ID jadwal dengan nama yang sama
+        const scheduleIds = sameNameSchedules.map(s => s.id);
+        
+        // Cari tugas yang terkait dengan jadwal-jadwal ini
+        scheduleTasks = tasks.filter(task => scheduleIds.includes(task.courseId));
+        
         const activeTasks = scheduleTasks.filter(task => !task.completed);
         const completedTasks = scheduleTasks.filter(task => task.completed);
         
@@ -882,21 +904,50 @@ function formatDateForInput(date) {
 function populateCourseOptions(selectedId = null) {
     taskCourseInput.innerHTML = '<option value="">Pilih Mata Kuliah</option>';
     
-    // Sort mata kuliah berdasarkan nama
-    const sortedSchedules = [...schedules].sort((a, b) => 
-        a.courseName.localeCompare(b.courseName)
-    );
+    // Kelompokkan jadwal berdasarkan nama matakuliah
+    const courseGroups = {};
     
-    sortedSchedules.forEach(schedule => {
-        const option = document.createElement('option');
-        option.value = schedule.id;
-        option.textContent = schedule.courseName;
-        
-        if (selectedId && schedule.id === selectedId) {
-            option.selected = true;
+    schedules.forEach(schedule => {
+        if (!courseGroups[schedule.courseName]) {
+            courseGroups[schedule.courseName] = [];
         }
-        
-        taskCourseInput.appendChild(option);
+        courseGroups[schedule.courseName].push(schedule);
+    });
+    
+    // Sort mata kuliah berdasarkan nama
+    const sortedCourseNames = Object.keys(courseGroups).sort();
+    
+    sortedCourseNames.forEach(courseName => {
+        // Jika hanya ada 1 jadwal dengan nama ini, gunakan seperti biasa
+        if (courseGroups[courseName].length === 1) {
+            const schedule = courseGroups[courseName][0];
+            const option = document.createElement('option');
+            option.value = schedule.id;
+            option.textContent = schedule.courseName;
+            
+            if (selectedId && schedule.id === selectedId) {
+                option.selected = true;
+            }
+            
+            taskCourseInput.appendChild(option);
+        } 
+        // Jika ada lebih dari 1 jadwal dengan nama yang sama
+        else {
+            // Pilih salah satu ID sebagai representasi (yang pertama)
+            const mainSchedule = courseGroups[courseName][0];
+            
+            // Tambahkan opsi untuk mata kuliah dengan nama yang sama
+            const option = document.createElement('option');
+            option.value = mainSchedule.id;
+            option.textContent = mainSchedule.courseName;
+            
+            // Jika id yang dipilih ada dalam grup ini, atur sebagai terpilih
+            if (selectedId && courseGroups[courseName].some(s => s.id === selectedId)) {
+                option.selected = true;
+            }
+            
+            taskCourseInput.appendChild(option);
+        }
     });
 }
 

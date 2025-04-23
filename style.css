@@ -242,11 +242,11 @@ main {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding-bottom: 8px;
     margin-bottom: 16px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
     padding-top: 10px;
+    padding-bottom: 13px;
 }
 
 .day-nav::-webkit-scrollbar {
