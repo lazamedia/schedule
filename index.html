@@ -222,7 +222,11 @@
                     
                     <div class="form-group">
                         <label class="form-label" for="courseName">Nama Mata Kuliah*</label>
-                        <input type="text" class="form-control" id="courseName" required placeholder="Contoh: Algoritma dan Struktur Data">
+                        <!-- <input type="text" class="form-control" id="courseName" required placeholder="Contoh: Algoritma dan Struktur Data"> -->
+                        <div class="suggestions-container">
+                            <input type="text" class="form-control" id="courseName" required placeholder="Contoh: Algoritma dan Struktur Data" required>
+                            <div id="courseNameSuggestions" class="suggestions-list"></div>
+                        </div>
                     </div>
                     
                     <div class="form-group" id="daySelectContainer">

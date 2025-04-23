@@ -54,6 +54,7 @@ const scheduleIdInput = document.getElementById('scheduleId');
 const daySelectContainer = document.getElementById('daySelectContainer');
 const dayInput = document.getElementById('day');
 const courseNameInput = document.getElementById('courseName');
+const courseNameSuggestions = document.getElementById('courseNameSuggestions'); // Tambahkan elemen sugesti
 const timeStartInput = document.getElementById('timeStart');
 const timeEndInput = document.getElementById('timeEnd');
 const roomInput = document.getElementById('room');
@@ -110,6 +111,15 @@ const colorThemes = [
     { name: 'Orange', value: '#e67e22' },
     { name: 'Teal', value: '#1abc9c' }
 ];
+
+// Helper untuk normalisasi nama mata kuliah (mengabaikan huruf besar/kecil dan spasi berlebih)
+function normalizeCourseName(name) {
+    // Mengubah ke lowercase dan menghapus spasi di awal/akhir
+    let normalized = name.toLowerCase().trim();
+    // Mengganti multiple spaces dengan single space
+    normalized = normalized.replace(/\s+/g, ' ');
+    return normalized;
+}
 
 // Inisialisasi aplikasi
 function initApp() {
@@ -286,6 +296,15 @@ function initApp() {
         deleteSchedule(id);
         deleteModal.classList.remove('show');
     });
+    
+    // Setup event listeners untuk sugesti mata kuliah
+    courseNameInput.addEventListener('input', showCourseSuggestions);
+    courseNameInput.addEventListener('focus', showCourseSuggestions);
+    document.addEventListener('click', (e) => {
+        if (e.target !== courseNameInput && e.target !== courseNameSuggestions) {
+            courseNameSuggestions.style.display = 'none';
+        }
+    });
 }
 
 // Load data dari localStorage
@@ -404,6 +423,62 @@ function setupNavigations() {
     });
 }
 
+// Dapatkan semua jadwal dengan nama mata kuliah yang sama (termasuk perbedaan kapitalisasi/spasi)
+function getSchedulesWithSimilarName(targetSchedule) {
+    const normalizedName = normalizeCourseName(targetSchedule.courseName);
+    return schedules.filter(schedule => 
+        normalizeCourseName(schedule.courseName) === normalizedName
+    );
+}
+
+// Tampilkan sugesti mata kuliah
+function showCourseSuggestions() {
+    const input = courseNameInput.value.trim();
+    
+    // Jika input kosong, sembunyikan sugesti
+    if (input === '') {
+        courseNameSuggestions.style.display = 'none';
+        return;
+    }
+    
+    // Dapatkan daftar unik dari nama mata kuliah (normalisasi)
+    const uniqueCourseNames = new Set();
+    
+    schedules.forEach(schedule => {
+        uniqueCourseNames.add(schedule.courseName);
+    });
+    
+    // Filter berdasarkan input
+    const normalizedInput = normalizeCourseName(input);
+    const filteredSuggestions = [...uniqueCourseNames].filter(name => 
+        normalizeCourseName(name).includes(normalizedInput)
+    );
+    
+    // Jika tidak ada sugesti, sembunyikan elemen
+    if (filteredSuggestions.length === 0) {
+        courseNameSuggestions.style.display = 'none';
+        return;
+    }
+    
+    // Tampilkan sugesti
+    courseNameSuggestions.innerHTML = '';
+    
+    filteredSuggestions.forEach(suggestion => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-item';
+        item.textContent = suggestion;
+        
+        item.addEventListener('click', () => {
+            courseNameInput.value = suggestion;
+            courseNameSuggestions.style.display = 'none';
+        });
+        
+        courseNameSuggestions.appendChild(item);
+    });
+    
+    courseNameSuggestions.style.display = 'block';
+}
+
 // Render jadwal untuk hari aktif
 function renderSchedules() {
     // Filter jadwal berdasarkan hari aktif
@@ -430,17 +505,14 @@ function renderSchedules() {
             const formattedStartTime = formatTime(schedule.timeStart);
             const formattedEndTime = formatTime(schedule.timeEnd);
             
-            // Hitung jumlah tugas untuk jadwal ini dan jadwal lain dengan nama yang sama
-            let scheduleTasks = [];
-            
-            // Cari semua jadwal dengan nama mata kuliah yang sama
-            const sameNameSchedules = schedules.filter(s => s.courseName === schedule.courseName);
+            // Dapatkan semua jadwal dengan nama yang sama (normalisasi)
+            const sameNameSchedules = getSchedulesWithSimilarName(schedule);
             
             // Kumpulkan semua ID jadwal dengan nama yang sama
             const scheduleIds = sameNameSchedules.map(s => s.id);
             
             // Cari tugas yang terkait dengan jadwal-jadwal ini
-            scheduleTasks = tasks.filter(task => 
+            const scheduleTasks = tasks.filter(task => 
                 scheduleIds.includes(task.courseId) && !task.completed
             );
             
@@ -560,8 +632,6 @@ function renderTasks() {
             });
         });
         
-
-        
         // Tambahkan event listener untuk tombol view
         document.querySelectorAll('.view-task-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -586,17 +656,14 @@ function showScheduleDetail(id) {
         const formattedStartTime = formatTime(schedule.timeStart);
         const formattedEndTime = formatTime(schedule.timeEnd);
         
-        // Hitung jumlah tugas untuk jadwal ini dan jadwal lain dengan nama yang sama
-        let scheduleTasks = [];
-        
-        // Cari semua jadwal dengan nama mata kuliah yang sama
-        const sameNameSchedules = schedules.filter(s => s.courseName === schedule.courseName);
+        // Dapatkan semua jadwal dengan nama yang sama (normalisasi)
+        const sameNameSchedules = getSchedulesWithSimilarName(schedule);
         
         // Kumpulkan semua ID jadwal dengan nama yang sama
         const scheduleIds = sameNameSchedules.map(s => s.id);
         
         // Cari tugas yang terkait dengan jadwal-jadwal ini
-        scheduleTasks = tasks.filter(task => scheduleIds.includes(task.courseId));
+        const scheduleTasks = tasks.filter(task => scheduleIds.includes(task.courseId));
         
         const activeTasks = scheduleTasks.filter(task => !task.completed);
         const completedTasks = scheduleTasks.filter(task => task.completed);
@@ -904,50 +971,36 @@ function formatDateForInput(date) {
 function populateCourseOptions(selectedId = null) {
     taskCourseInput.innerHTML = '<option value="">Pilih Mata Kuliah</option>';
     
-    // Kelompokkan jadwal berdasarkan nama matakuliah
+    // Kelompokkan jadwal berdasarkan nama matakuliah (normalisasi)
     const courseGroups = {};
     
     schedules.forEach(schedule => {
-        if (!courseGroups[schedule.courseName]) {
-            courseGroups[schedule.courseName] = [];
+        const normalizedName = normalizeCourseName(schedule.courseName);
+        
+        if (!courseGroups[normalizedName]) {
+            courseGroups[normalizedName] = [];
         }
-        courseGroups[schedule.courseName].push(schedule);
+        courseGroups[normalizedName].push(schedule);
     });
     
     // Sort mata kuliah berdasarkan nama
     const sortedCourseNames = Object.keys(courseGroups).sort();
     
-    sortedCourseNames.forEach(courseName => {
-        // Jika hanya ada 1 jadwal dengan nama ini, gunakan seperti biasa
-        if (courseGroups[courseName].length === 1) {
-            const schedule = courseGroups[courseName][0];
-            const option = document.createElement('option');
-            option.value = schedule.id;
-            option.textContent = schedule.courseName;
-            
-            if (selectedId && schedule.id === selectedId) {
-                option.selected = true;
-            }
-            
-            taskCourseInput.appendChild(option);
-        } 
-        // Jika ada lebih dari 1 jadwal dengan nama yang sama
-        else {
-            // Pilih salah satu ID sebagai representasi (yang pertama)
-            const mainSchedule = courseGroups[courseName][0];
-            
-            // Tambahkan opsi untuk mata kuliah dengan nama yang sama
-            const option = document.createElement('option');
-            option.value = mainSchedule.id;
-            option.textContent = mainSchedule.courseName;
-            
-            // Jika id yang dipilih ada dalam grup ini, atur sebagai terpilih
-            if (selectedId && courseGroups[courseName].some(s => s.id === selectedId)) {
-                option.selected = true;
-            }
-            
-            taskCourseInput.appendChild(option);
+    sortedCourseNames.forEach(normalizedName => {
+        // Pilih salah satu jadwal sebagai representasi (yang pertama)
+        const mainSchedule = courseGroups[normalizedName][0];
+        
+        // Tambahkan opsi untuk mata kuliah dengan nama yang sama
+        const option = document.createElement('option');
+        option.value = mainSchedule.id;
+        option.textContent = mainSchedule.courseName;
+        
+        // Jika id yang dipilih ada dalam grup ini, atur sebagai terpilih
+        if (selectedId && courseGroups[normalizedName].some(s => s.id === selectedId)) {
+            option.selected = true;
         }
+        
+        taskCourseInput.appendChild(option);
     });
 }
 
